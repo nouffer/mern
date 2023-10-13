@@ -11,8 +11,9 @@ export const updateUser = async (req, res, next) => {
     return next(errorHandler(401, "Unauthorized"));
   try {
     if (req.body.password) {
-      req.body.password = bcryptjs.hashSync(req.body.password, 100);
+      req.body.password = bcryptjs.hashSync(req.body.password, 10);
     }
+    console.log(req.params.id);
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
       {
