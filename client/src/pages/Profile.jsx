@@ -11,6 +11,9 @@ import {
   updateUserStart,
   updateUserSuccess,
   updateUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 
@@ -22,6 +25,7 @@ function Profile() {
   const [fileUploadError, setFileUploaderror] = useState(false);
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -75,15 +79,35 @@ function Profile() {
       const data = await res.json(res);
 
       if (data.success === false) {
-        console.log(data.message);
         dispatch(updateUserFailure(data.message));
         return;
       }
       dispatch(updateUserSuccess(data));
       setUpdateSuccess(true);
     } catch (error) {
-      console.log(error.message);
       dispatch(updateUserFailure(error.message));
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      dispatch(deleteUserStart);
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      const data = await res.json(res);
+      if (data.success === false) {
+        console.log(data.message);
+        dispatch(deleteUserFailure(data.message));
+        return;
+      }
+      dispatch(deleteUserSuccess(data));
+      setDeleteSuccess(true);
+    } catch (error) {
+      dispatch(deleteUserFailure(error.message));
+    } finally {
+      setDeleteSuccess(false);
     }
   };
 
@@ -151,7 +175,14 @@ function Profile() {
         </button>
       </form>
       <div className="flex justify-between mt-5">
-        <span className=" text-red-700 cursor-pointer">Delete account</span>
+        <span
+          disabled={deleteSuccess}
+          onClick={handleDeleteUser}
+          className=" text-red-700 cursor-pointer"
+        >
+          {" "}
+          {deleteSuccess ? "Deleting user ..." : "Delete user"}
+        </span>
         <span className=" text-red-700 cursor-pointer">Sign out</span>
       </div>
       <p className=" text-red-700 mt-5">{error ? error : ""}</p>

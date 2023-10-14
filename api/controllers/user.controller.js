@@ -6,6 +6,22 @@ export const test = (req, res) => {
   res.json({ message: "hellow test" });
 };
 
+export const deleteUser = async (req, res, next) => {
+  if (req.user.id !== req.params.id)
+    return next(errorHandler(401, "unauthorized"));
+  try {
+    const result = await User.findByIdAndDelete(req.params.id);
+    if (result) {
+      res.clearCookie("access_token");
+      res.status(200).json("User has been deleted");
+    } else {
+      return next(errorHandler(401, "Unable to delete user"));
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateUser = async (req, res, next) => {
   if (req.user.id !== req.params.id)
     return next(errorHandler(401, "Unauthorized"));
@@ -27,7 +43,6 @@ export const updateUser = async (req, res, next) => {
       { new: true }
     );
     const { password, ...rest } = updatedUser._doc;
-    console.log(updateUser);
     res.status(200).json(rest);
   } catch (error) {
     next(error);
