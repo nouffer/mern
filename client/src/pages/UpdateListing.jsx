@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getDownloadURL,
   getStorage,
@@ -7,9 +7,9 @@ import {
 } from "firebase/storage";
 import { app } from "../firebase.js";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function CreateListing() {
+export default function UpdateListing() {
   const { currentUser } = useSelector((state) => state.user);
   const [files, setFiles] = useState([]);
   const [formData, setFormData] = useState({
@@ -31,6 +31,20 @@ export default function CreateListing() {
   const [formSubmiError, setFormSubmitError] = useState(false);
   const [formSubmitLoading, setFormSubmitLoading] = useState(false);
   const navigate = useNavigate();
+  const params = useParams();
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      const id = params.id;
+      const listing = await fetch(`/api/listing/get/${id}`);
+      const data = await listing.json();
+      if (data.success === false) {
+        console.log(data.message);
+      }
+      setFormData(data);
+    };
+    fetchListing();
+  }, [params.id]);
 
   const handleImageSubmit = () => {
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
@@ -124,7 +138,7 @@ export default function CreateListing() {
       }
       setFormSubmitLoading(true);
       setFormSubmitError(false);
-      const res = await fetch("/api/listing/create", {
+      const res = await fetch(`/api/listing/update/${params.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -146,7 +160,7 @@ export default function CreateListing() {
   return (
     <main className="p-3 max-w-4xl mx-auto">
       <h1 className=" text-3xl font-semibold text-center my-7">
-        Create Listing
+        Update Listing
       </h1>
       <form
         onSubmit={handleFormSubmit}
@@ -345,7 +359,7 @@ export default function CreateListing() {
             disabled={formSubmitLoading || uploading}
             className="p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
           >
-            {formSubmitLoading ? "Creating ..." : "Create Listing"}
+            {formSubmitLoading ? "Updating ..." : "Update Listing"}
           </button>
           {formSubmiError && (
             <p className=" text-red-700 text-sm">{formSubmiError}</p>
