@@ -32,6 +32,8 @@ function Profile() {
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [showListingsError, setShowListingsError] = useState(false);
   const [userListings, setUserListings] = useState([]);
+  const [listingDeleteError, SetListingDeleteError] = useState(false);
+  const [showListingDeleteError, setShowListingDeleteError] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -147,6 +149,28 @@ function Profile() {
     }
   };
 
+  const handleDeleteListing = async (id) => {
+    SetListingDeleteError(false);
+    setShowListingDeleteError(false);
+    try {
+      const res = await fetch(`/api/listing/delete/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success === "false") {
+        SetListingDeleteError(true);
+        setShowListingDeleteError(true);
+        return;
+      }
+      setUserListings((prev) => prev.filter((listing) => listing._id !== id));
+      SetListingDeleteError(false);
+      setShowListingDeleteError(false);
+    } catch (error) {
+      SetListingDeleteError(error.message);
+      setShowListingDeleteError(true);
+    }
+  };
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className=" text-3xl font-semibold my-7 text-center">Profile</h1>
@@ -240,9 +264,11 @@ function Profile() {
         {showListingsError ? "Error showing Listings" : ""}
       </p>
       <div className=" flex flex-col gap-4">
-        <h1 className=" text-slate-700 text-2xl text-center mt-7 font-semibold">
-          Your Listings
-        </h1>
+        {userListings && userListings.length > 0 && (
+          <h1 className=" text-slate-700 text-2xl text-center mt-7 font-semibold">
+            Your Listings
+          </h1>
+        )}
         {userListings &&
           userListings.length > 0 &&
           userListings.map((listing) => (
@@ -264,7 +290,10 @@ function Profile() {
                 <p>{listing.name}</p>
               </Link>
               <div className="flex flex-col items-center">
-                <button className=" text-red-700 uppercase text-sm">
+                <button
+                  onClick={() => handleDeleteListing(listing._id)}
+                  className=" text-red-700 uppercase text-sm"
+                >
                   Delete
                 </button>
                 <button className=" text-green-700 uppercase text-sm">
