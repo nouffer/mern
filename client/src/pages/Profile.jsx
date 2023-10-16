@@ -30,6 +30,8 @@ function Profile() {
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [showListingsError, setShowListingsError] = useState(false);
+  const [userListings, setUserListings] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -53,7 +55,7 @@ function Profile() {
         setFilePerc(Math.round(progress));
       },
       (error) => {
-        setFileUploaderror(true);
+        setFileUploaderror(error.message);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
@@ -127,6 +129,21 @@ function Profile() {
       dispatch(signoutUserSuccess());
     } catch (error) {
       dispatch(signoutUserFailure(error));
+    }
+  };
+
+  const handleShowListings = async () => {
+    setShowListingsError(false);
+    try {
+      const listings = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await listings.json();
+      if (data.status === false) {
+        setShowListingsError(true);
+        return;
+      }
+      setUserListings(data);
+    } catch (error) {
+      setShowListingsError(true);
     }
   };
 
@@ -216,6 +233,47 @@ function Profile() {
       <p className=" text-green-700 mt-5">
         {updateSuccess ? "User updated successfully" : ""}
       </p>
+      <button onClick={handleShowListings} className=" text-green-700 w-full">
+        Show Listings
+      </button>
+      <p className="text-red-700 mt-5">
+        {showListingsError ? "Error showing Listings" : ""}
+      </p>
+      <div className=" flex flex-col gap-4">
+        <h1 className=" text-slate-700 text-2xl text-center mt-7 font-semibold">
+          Your Listings
+        </h1>
+        {userListings &&
+          userListings.length > 0 &&
+          userListings.map((listing) => (
+            <div
+              key={listing._id}
+              className="flex border rounded-lg p-3 justify-between items-center"
+            >
+              <Link to={`/listings/${listing._id}`}>
+                <img
+                  className="h-16 w-16 object-contain"
+                  src={listing.imageUrls[0]}
+                  alt="listing cover image"
+                />
+              </Link>
+              <Link
+                className="flex-1 text-slate-700 font-semibold hover:underline truncate gap-4"
+                to={`/listings/${listing._id}`}
+              >
+                <p>{listing.name}</p>
+              </Link>
+              <div className="flex flex-col items-center">
+                <button className=" text-red-700 uppercase text-sm">
+                  Delete
+                </button>
+                <button className=" text-green-700 uppercase text-sm">
+                  Edit
+                </button>
+              </div>
+            </div>
+          ))}
+      </div>
     </div>
   );
 }
