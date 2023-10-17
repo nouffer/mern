@@ -281,27 +281,31 @@ export default function UpdateListing() {
                 type="number"
                 id="regularPrice"
                 min="1"
-                max="1000000"
+                max="1000000000"
               />
               <div className="flex flex-col items-center">
                 <p>Regular price</p>
-                <span className=" text-xs">$ / month</span>
+                {formData.type === "rent" && (
+                  <span className=" text-xs">$ / month</span>
+                )}
               </div>
             </div>
             {formData.offer && (
               <div className="flex items-center gap-2">
                 <input
                   onChange={handleFormChange}
-                  value={formData.descountedPrice}
+                  value={formData.discountedPrice}
                   className="p-2 border border-gray-300 rounded-lg"
                   type="number"
                   id="discountedPrice"
                   min="0"
-                  max="1000000"
+                  max="1000000000"
                 />
                 <div className="flex flex-col items-center">
                   <p>Discounted price</p>
-                  <span className=" text-xs">$ / month</span>
+                  {formData.type === "rent" && (
+                    <span className=" text-xs">$ / month</span>
+                  )}
                 </div>
               </div>
             )}
