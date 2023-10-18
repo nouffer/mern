@@ -12,7 +12,7 @@ export default function Header() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const urlParams = new URLSearchParams(location.search);
-    urlParams.set("searchterm", searchTerm);
+    urlParams.set("searchTerm", searchTerm);
     const searchQuery = urlParams.toString();
     navigate(`/search?${searchQuery}`);
   };
@@ -20,7 +20,7 @@ export default function Header() {
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     console.log(searchTerm);
-    const searchtermfromUrl = urlParams.get("searchterm");
+    const searchtermfromUrl = urlParams.get("searchTerm");
     if (searchtermfromUrl) {
       setSearchTerm(searchtermfromUrl);
     }
